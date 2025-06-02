@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Меню практик</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome для иконок -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            background: url('images/background.png');
+            background-attachment: fixed;
+            background-size: contain;
+            height: 100vh;
+            display: flex;
+            font-weight: bold;
+            font-size: 20px;
+            overflow-x: hidden;
+        }
+
+        /* Стили для бокового меню */
+        .sidebar {
+            width: 250px;
+            background-color: #f8f9fa;
+            position: fixed;
+            top: 0;
+            left: -250px;
+            height: 100vh;
+            transition: all 0.3s;
+            z-index: 1000;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            padding-top: 20px;
+        }
+
+        .sidebar.active {
+            left: 0;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .sidebar-menu li {
+            padding: 12px 20px;
+            border-bottom: 1px solid #e1e1e1;
+        }
+
+        .sidebar-menu li a {
+            color: #333;
+            text-decoration: none;
+            display: block;
+        }
+
+        .sidebar-menu li a:hover {
+            color: #003366;
+            background-color: #e9ecef;
+        }
+
+        .sidebar-menu li.active {
+            background-color: #e9ecef;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 999;
+            display: none;
+        }
+
+        .overlay.active {
+            display: block;
+        }
+
+        .main-content {
+            flex: 1;
+            transition: all 0.3s;
+            margin-left: 0;
+        }
+
+        .main-content.shifted {
+            margin-left: 250px;
+        }
+
+        .table-scroll-wrapper {
+            max-height: 400px;
+            overflow-y: auto;
+            border-radius: 5px;
+        }
+
+        .custom-table thead th {
+            position: sticky;
+            top: 0;
+            background-color: white;
+            z-index: 2;
+        }
+
+        .header-bar {
+            background-color: rgba(35, 103, 162, 0.9);
+            color: white;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 20px auto 0 auto;
+            border-radius: 20px;
+            max-width: 1000px;
+            width: 90%;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .menu-icon {
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .main-wrapper {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .content-box {
+            background-color: white;
+            border: 3px solid #033361;
+            border-radius: 25px;
+            padding: 30px;
+            width: 90%;
+            max-width: 1000px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .practice-title {
+            background-color: #A9C4DE;
+            padding: 10px 30px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 20px;
+            white-space: nowrap;
+        }
+
+        .btn-dark-blue {
+            background-color: #003366;
+            color: #ffffff;
+            border-radius: 20px;
+            padding: 10px 40px;
+            font-weight: bold;
+            font-size: 20px;
+        }
+
+        .btn-outline-dark-blue {
+            color: #003366;
+            border: 3px solid #003366;
+            background-color: white;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 20px;
+            padding: 10px 20px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-outline-dark-blue:hover {
+            background-color: #003366;
+            color: white;
+        }
+
+        .btn-dark-blue:hover {
+            background-color: white;
+            border: 3px solid #033362;
+            color: #033362;
+        }
+
+        .custom-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            border: 3px solid #003365;
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        .custom-table th, .custom-table td {
+            text-align: center;
+            padding: 16px;
+            border-bottom: 3px solid #033361;
+            border-left: 3px solid #033361;
+        }
+
+        .custom-table th:first-child,
+        .custom-table td:first-child {
+            border-left: none;
+        }
+
+        .custom-table th {
+            background-color: white;
+            font-weight: bold;
+            font-size: 1rem;
+        }
+
+        .custom-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .bottom-buttons .btn-outline-primary {
+            border-radius: 20px;
+            padding: 10px 20px;
+        }
+
+        .icons img {
+            height: 32px;
+            object-fit: contain;
+        }
+
+        .bottom-buttons img {
+            display: inline-block;
+        }
+
+        /* Модальные окна */
+        .modal-content {
+            border-radius: 20px;
+            border: 3px solid #033361;
+        }
+
+        .modal-header {
+            background-color: #A9C4DE;
+            border-bottom: 3px solid #033361;
+            border-radius: 17px 17px 0 0 !important;
+        }
+
+        .modal-footer {
+            border-top: 3px solid #033361;
+        }
+
+        /* Формы */
+        .form-control {
+            border: 2px solid #033361;
+            border-radius: 10px;
+            padding: 10px 15px;
+            font-size: 18px;
+        }
+
+        .form-label {
+            font-weight: bold;
+            color: #003366;
+        }
+
+        /* Уведомления */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1100;
+        }
+
+        .toast {
+            border: 2px solid #033361;
+            border-radius: 15px;
+        }
+
+        /* Выбранная строка в таблице */
+        .selected-row {
+            background-color: #e9f5ff !important;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Боковое меню -->
+<div class="sidebar">
+    <ul class="sidebar-menu">
+        <li><a href="#"><i class="fas fa-home me-2"></i>Главная</a></li>
+        <li><a href="#"><i class="fas fa-plus-circle me-2"></i>Создать проект</a></li>
+        <li><a href="#"><i class="fas fa-folder-open me-2"></i>Проекты</a></li>
+        <li><a href="#"><i class="fas fa-tasks me-2"></i>Мои задачи</a></li>
+        <li><a href="#"><i class="fas fa-book me-2"></i>Дисциплины</a></li>
+        <li><a href="#"><i class="fas fa-graduation-cap me-2"></i>Курсы</a></li>
+        <li><a href="#"><i class="fas fa-database me-2"></i>База знаний</a></li>
+        <li><a href="#"><i class="fas fa-calendar-alt me-2"></i>Календарь проектов</a></li>
+        <li class="active"><a href="#"><i class="fas fa-file-alt me-2"></i>Курсовые и практики</a></li>
+        <li><a href="#"><i class="fas fa-cog me-2"></i>Настройки</a></li>
+        <li><a href="#"><i class="fas fa-comment me-2"></i>Отзывы</a></li>
+    </ul>
+</div>
+
+<!-- Затемнение фона при открытом меню -->
+<div class="overlay"></div>
+
+<!-- Уведомления -->
+<div class="toast-container">
+    <div class="toast align-items-center text-white bg-success" role="alert" aria-live="assertive" aria-atomic="true" id="successToast">
+        <div class="d-flex">
+            <div class="toast-body">
+                Операция выполнена успешно!
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+</div>
+
+<!-- Основное содержимое -->
+<div class="main-content">
+    <!-- Верхняя панель -->
+    <header class="header-bar">
+        <div class="menu-icon">&#9776;</div>
+        <div class="user-info">
+            <img src="images/icon-bell.png" alt="Уведомления" style="height: 24px;">
+            <span>Фамилия Имя</span>
+        </div>
+    </header>
+
+    <!-- Центрированный контейнер -->
+    <div class="main-wrapper">
+        <div class="content-box">
+
+            <!-- Заголовок и кнопки -->
+            <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+                <div class="practice-title">Меню практик</div>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-dark-blue" id="filterBtn">
+                        <i class="fas fa-filter me-2"></i>Фильтр
+                    </button>
+                    <button class="btn btn-dark-blue" id="searchBtn">
+                        <i class="fas fa-search me-2"></i>Поиск
+                    </button>
+                </div>
+            </div>
+
+            <!-- Таблица -->
+            <div class="table-scroll-wrapper">
+                <table class="custom-table table" id="practicesTable">
+                    <thead>
+                    <tr>
+                        <th>Название</th>
+                        <th>Специальность</th>
+                        <th>Код</th>
+                        <th>Заявки</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mt-4 bottom-buttons">
+                <!-- Кнопка "Править" -->
+                <button class="btn btn-outline-dark-blue d-flex align-items-center gap-2" id="editBtn" disabled>
+                    <i class="fas fa-edit"></i>
+                    Править
+                </button>
+
+                <!-- Центр иконок -->
+                <div class="icons d-flex gap-3">
+                    <img src="images/icon-books.png" alt="Книги" style="height: 60px;">
+                </div>
+
+                <!-- Кнопка "Создать" -->
+                <button class="btn btn-outline-dark-blue d-flex align-items-center gap-2" id="createBtn">
+                    <i class="fas fa-plus"></i>
+                    Создать
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно фильтрации -->
+<div class="modal fade" id="filterModal" tabindex="-1" aria-labelledby="filterModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="filterModalLabel">Фильтр практик</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="filterForm">
+                    <div class="mb-3">
+                        <label for="specialtyFilter" class="form-label">Специальность</label>
+                        <select class="form-select" id="specialtyFilter">
+                            <option value="">Все специальности</option>
+                            <option value="Программирование">Программирование</option>
+                            <option value="Дизайн">Дизайн</option>
+                            <option value="Маркетинг">Маркетинг</option>
+                            <option value="Менеджмент">Менеджмент</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="applicationsFilter" class="form-label">Количество заявок</label>
+                        <select class="form-select" id="applicationsFilter">
+                            <option value="">Любое количество</option>
+                            <option value="5">Менее 5</option>
+                            <option value="10">5-10</option>
+                            <option value="more">Более 10</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-dark-blue" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-dark-blue" id="applyFilterBtn">Применить</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно поиска -->
+<div class="modal fade" id="searchModal" tabindex="-1" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="searchModalLabel">Поиск практик</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="searchForm">
+                    <div class="mb-3">
+                        <label for="searchQuery" class="form-label">Поисковый запрос</label>
+                        <input type="text" class="form-control" id="searchQuery" placeholder="Введите название или код практики">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-dark-blue" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-dark-blue" id="applySearchBtn">Поиск</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно создания/редактирования -->
+<div class="modal fade" id="practiceModal" tabindex="-1" aria-labelledby="practiceModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="practiceModalLabel">Новая практика</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="practiceForm">
+                    <div class="mb-3">
+                        <label for="practiceName" class="form-label">Название практики</label>
+                        <input type="text" class="form-control" id="practiceName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="practiceSpecialty" class="form-label">Специальность</label>
+                        <select class="form-select" id="practiceSpecialty" required>
+                            <option value="">Выберите специальность</option>
+                            <option value="Программирование">Программирование</option>
+                            <option value="Дизайн">Дизайн</option>
+                            <option value="Маркетинг">Маркетинг</option>
+                            <option value="Менеджмент">Менеджмент</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="practiceCode" class="form-label">Код практики</label>
+                        <input type="text" class="form-control" id="practiceCode" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="practiceApplications" class="form-label">Количество заявок</label>
+                        <input type="number" class="form-control" id="practiceApplications" min="0" value="0">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-dark-blue" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-dark-blue" id="savePracticeBtn">Сохранить</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Элементы интерфейса
+        const menuIcon = document.querySelector('.menu-icon');
+        const sidebar = document.querySelector('.sidebar');
+        const overlay = document.querySelector('.overlay');
+        const mainContent = document.querySelector('.main-content');
+        const editBtn = document.getElementById('editBtn');
+        const createBtn = document.getElementById('createBtn');
+        const filterBtn = document.getElementById('filterBtn');
+        const searchBtn = document.getElementById('searchBtn');
+        const applyFilterBtn = document.getElementById('applyFilterBtn');
+        const applySearchBtn = document.getElementById('applySearchBtn');
+        const savePracticeBtn = document.getElementById('savePracticeBtn');
+        const practicesTable = document.getElementById('practicesTable');
+        const successToast = new bootstrap.Toast(document.getElementById('successToast'));
+
+        // Модальные окна
+        const filterModal = new bootstrap.Modal(document.getElementById('filterModal'));
+        const searchModal = new bootstrap.Modal(document.getElementById('searchModal'));
+        const practiceModal = new bootstrap.Modal(document.getElementById('practiceModal'));
+
+        // Переменные состояния
+        let selectedRow = null;
+        let isEditMode = false;
+        let currentFilters = {
+            specialty: '',
+            applications: ''
+        };
+
+        // Обработчики событий
+        menuIcon.addEventListener('click', toggleSidebar);
+        overlay.addEventListener('click', toggleSidebar);
+        editBtn.addEventListener('click', openEditModal);
+        createBtn.addEventListener('click', openCreateModal);
+        filterBtn.addEventListener('click', () => filterModal.show());
+        searchBtn.addEventListener('click', () => searchModal.show());
+        applyFilterBtn.addEventListener('click', applyFilters);
+        applySearchBtn.addEventListener('click', applySearch);
+        savePracticeBtn.addEventListener('click', savePractice);
+
+        // Функции
+        function toggleSidebar() {
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+            mainContent.classList.toggle('shifted');
+        }
+
+        function selectRow(row) {
+            // Снимаем выделение со всех строк
+            const rows = practicesTable.querySelectorAll('tbody tr');
+            rows.forEach(r => r.classList.remove('selected-row'));
+
+            // Выделяем выбранную строку
+            row.classList.add('selected-row');
+            selectedRow = row;
+            editBtn.disabled = false;
+        }
+
+        function openEditModal() {
+            if (!selectedRow) return;
+
+            isEditMode = true;
+            document.getElementById('practiceModalLabel').textContent = 'Редактирование практики';
+
+            // Заполняем форму данными из выбранной строки
+            const cells = selectedRow.cells;
+            document.getElementById('practiceName').value = cells[0].textContent;
+            document.getElementById('practiceSpecialty').value = cells[1].textContent;
+            document.getElementById('practiceCode').value = cells[2].textContent;
+            document.getElementById('practiceApplications').value = parseInt(cells[3].textContent);
+
+            practiceModal.show();
+        }
+
+        function openCreateModal() {
+            isEditMode = false;
+            document.getElementById('practiceModalLabel').textContent = 'Новая практика';
+            document.getElementById('practiceForm').reset();
+            practiceModal.show();
+        }
+
+        function applyFilters() {
+            const specialty = document.getElementById('specialtyFilter').value;
+            const applications = document.getElementById('applicationsFilter').value;
+
+            currentFilters = { specialty, applications };
+            filterRows();
+            filterModal.hide();
+        }
+
+        function applySearch() {
+            const query = document.getElementById('searchQuery').value.toLowerCase();
+
+            const rows = practicesTable.querySelectorAll('tbody tr');
+            rows.forEach(row => {
+                const name = row.cells[0].textContent.toLowerCase();
+                const code = row.cells[2].textContent.toLowerCase();
+                const isVisible = name.includes(query) || code.includes(query);
+                row.style.display = isVisible ? '' : 'none';
+            });
+
+            searchModal.hide();
+        }
+
+        function filterRows() {
+            const rows = practicesTable.querySelectorAll('tbody tr');
+
+            rows.forEach(row => {
+                const specialty = row.cells[1].textContent;
+                const applications = parseInt(row.cells[3].textContent);
+
+                let specialtyMatch = true;
+                let applicationsMatch = true;
+
+                if (currentFilters.specialty && specialty !== currentFilters.specialty) {
+                    specialtyMatch = false;
+                }
+
+                if (currentFilters.applications === '5' && applications >= 5) {
+                    applicationsMatch = false;
+                } else if (currentFilters.applications === '10' && (applications < 5 || applications > 10)) {
+                    applicationsMatch = false;
+                } else if (currentFilters.applications === 'more' && applications <= 10) {
+                    applicationsMatch = false;
+                }
+
+                row.style.display = (specialtyMatch && applicationsMatch) ? '' : 'none';
+            });
+        }
+
+        function savePractice() {
+            const name = document.getElementById('practiceName').value;
+            const specialty = document.getElementById('practiceSpecialty').value;
+            const code = document.getElementById('practiceCode').value;
+            const applications = document.getElementById('practiceApplications').value;
+
+            if (!name || !specialty || !code) {
+                alert('Пожалуйста, заполните все обязательные поля');
+                return;
+            }
+
+            if (isEditMode && selectedRow) {
+                // Редактирование существующей строки
+                selectedRow.cells[0].textContent = name;
+                selectedRow.cells[1].textContent = specialty;
+                selectedRow.cells[2].textContent = code;
+                selectedRow.cells[3].textContent = applications;
+
+                showSuccessMessage('Практика успешно обновлена');
+            } else {
+                // Добавление новой строки
+                const newRow = practicesTable.querySelector('tbody').insertRow();
+                newRow.innerHTML = `
+                    <td>${name}</td>
+                    <td>${specialty}</td>
+                    <td>${code}</td>
+                    <td>${applications}</td>
+                `;
+                newRow.onclick = function() { selectRow(this); };
+
+                showSuccessMessage('Новая практика успешно добавлена');
+            }
+
+            practiceModal.hide();
+        }
+
+        function showSuccessMessage(message) {
+            document.querySelector('.toast-body').textContent = message;
+            successToast.show();
+        }
+    });
+</script>
+</body>
+</html>
